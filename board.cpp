@@ -6,8 +6,8 @@ Board::Board()
 {
     // Bitboards para cada jugador.
     // Usando valores binarios, inicialmente vacíos.
-    board[X] = 0b0; // Bitboard para X
-    board[O] = 0b0; // Bitboard para O
+    board[X] = 0; // Bitboard para X
+    board[O] = 0; // Bitboard para O
     turn = O;  // Comienza jugando X
 }
 
