@@ -44,7 +44,7 @@ std::vector<int> Board::generateAllLegalMoves() const
 
 bool Board::isLegalMove(const int position) const
 {
-    if (position < 0 || position >= 64)  // posicion dentro del rango?
+    if (position < 0 || position > 63)  // posicion dentro del rango?
         return false;
     if ((board[X] | board[O]) & (oneMask << position))  // posicion es vacia?
         return false;

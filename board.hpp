@@ -48,7 +48,7 @@ struct BoardHash
     {
         std::size_t h1 = std::hash<uint64_t>{}(board.getXBoard());
         std::size_t h2 = std::hash<uint64_t>{}(board.getOBoard());
-        std::size_t h3 = std::hash<int>{}(board.getActiveTurn());
+        std::size_t h3 = std::hash<bool>{}(board.getActiveTurn() == X);
 
         // Mezclar usando XOR y desplazamientos
         return h1 ^ (h2 << 1) ^ (h2 >> 1) ^ (h3 << 2) ^ (h3 >> 2);

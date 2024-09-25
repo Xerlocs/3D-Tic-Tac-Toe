@@ -7,7 +7,7 @@ TranspositionTable TT;
 
 int negamax(Board node, int depth, int &bestPosition)  // el uso & permite acceder a la variable original
 {
-    int maxDepth = 6;
+    int maxDepth = 9;
     if(node.endGame() || depth == maxDepth)
         return node.evaluate(depth);
 
@@ -116,7 +116,7 @@ int main()
     while (!newBoard.endGame()) {
         int position;
         if (newBoard.getActiveTurn() == X) {
-            int maxDepth = 6;  // Ajustar según el rendimiento
+            int maxDepth = 9;  // Ajustar según el rendimiento
             alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             position = bestPosition;
         } else {
