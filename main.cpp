@@ -1,11 +1,13 @@
 #include <iostream>
 
 #include "board.hpp"
+#include "TTEntry.h"
 
+TranspositionTable TT;
 
 int negamax(Board node, int depth, int &bestPosition)  // el uso & permite acceder a la variable original
 {
-    int maxDepth = 16;
+    int maxDepth = 6;
     if(node.endGame() || depth == maxDepth)
         return node.evaluate(depth);
 
@@ -25,9 +27,8 @@ int negamax(Board node, int depth, int &bestPosition)  // el uso & permite acced
 }
 
 
-int alphabeta(Board node, int depth, int alpha, int beta, int &bestPosition)
+int alphabeta(Board node, int maxDepth, int depth, int alpha, int beta, int &bestPosition)
 {
-    int maxDepth = 16;
     if(node.endGame() || depth == maxDepth)
         return node.evaluate(depth);
 
@@ -37,7 +38,7 @@ int alphabeta(Board node, int depth, int alpha, int beta, int &bestPosition)
         Board child(node.getXBoard(), node.getOBoard(), node.getActiveTurn());
         child.makeMove(position);
 
-        int value = -alphabeta(child, depth+1, -beta, -alpha, dummy);
+        int value = -alphabeta(child, maxDepth, depth+1, -beta, -alpha, dummy);
         if (value > bestValue) {
             bestValue = value;
             bestPosition = position;
@@ -48,25 +49,82 @@ int alphabeta(Board node, int depth, int alpha, int beta, int &bestPosition)
     return bestValue;
 }
 
+int iterativeDeepening(Board node, int maxDepth, int &bestPosition){
+    int value;
+    for(int depth = 0; depth < maxDepth; depth++) {
+        value = alphabeta(node, depth, 0, -10000000, 10000000, bestPosition);
+    }
+    return value;
+}
+
+int alphabetaTT(Board node, int maxDepth, int depth, int alpha, int beta, int &bestPosition)
+{
+    TTEntry ttEntry = TT.get(node);
+    if (ttEntry.isValid()){
+        if(ttEntry.getDepth() >= depth) {
+            if (ttEntry.isExact()){
+                return ttEntry.getValue();
+            }
+            if (ttEntry.isLower()) {
+                alpha = std::max(alpha, ttEntry.getValue());
+            } else if (ttEntry.isUpper()){
+                beta = std::min(beta, ttEntry.getValue());
+            }
+            if (alpha >= beta){
+                return ttEntry.getValue();
+            }
+        }
+    }
+
+    if(node.endGame() || depth == maxDepth)
+        return node.evaluate(depth);
+
+    int bestValue= -10000, dummy;  // dummy: variable para descartar las posiciones en las llamadas recursivas
+    int al = alpha;
+    // Iteramos sobre todas las posibles jugadas legales
+    for (int position : node.generateAllLegalMoves()) {
+        Board child(node.getXBoard(), node.getOBoard(), node.getActiveTurn());
+        child.makeMove(position);
+
+        int value = -alphabeta(child, maxDepth, depth+1, -beta, -al, dummy);
+        if (value > bestValue) {
+            bestValue = value;
+            bestPosition = position;
+            if (value > al) al = value;
+            if (al >= beta) break;
+        }
+    }
+    bool lower = false, exact = false, upper = false;
+    if (bestValue <= alpha)
+        upper = true;
+    else if (bestValue >= beta)
+        lower = true;
+    else
+        exact = true;
+    TT.store(TTEntry(bestValue, depth, lower, exact, upper, bestPosition), node);
+    return bestValue;
+}
+
 int main()
 {
+    Board board;
+    board.print();  // Mostrar el tablero inicial
     int depth = 0, bestPosition = -1;
 
     // Para realizar una jugada
     // se definen los siguientes valores para cada casilla
-    // 0  | 1  | 2  | 3
-    // 4  | 5  | 6  | 7
-    // 8  | 9  | 10 | 11
-    // 12 | 13 | 14 | 15
+    // 0 | 1 | 2
+    // 3 | 4 | 5
+    // 6 | 7 | 8
 
     // Pruebas de juego: humano vs negamax/alphabeta
-    std::cout << "Que comience el juego!" << std::endl;
+    std::cout << "Que comience el juego 4x4x4!" << std::endl;
     Board newBoard;
     while (!newBoard.endGame()) {
         int position;
         if (newBoard.getActiveTurn() == X) {
-            //negamax(newBoard, depth, bestPosition);
-            alphabeta(newBoard, depth, -10000000, 10000000, bestPosition);
+            int maxDepth = 6;  // Ajustar según el rendimiento
+            alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             position = bestPosition;
         } else {
             std::cout << "Ingresa una posición: ";

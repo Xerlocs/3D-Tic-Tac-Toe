@@ -6,20 +6,20 @@ Board::Board()
 {
     // Bitboards para cada jugador.
     // Usando valores binarios, inicialmente vacíos.
-    board[X] = 0b0000000000000000; // Bitboard para X (16 posiciones)
-    board[O] = 0b0000000000000000; // Bitboard para O
+    board[X] = 0; // Bitboard para X
+    board[O] = 0; // Bitboard para O
     turn = X;  // Comienza jugando X
 }
 
-Board::Board(uint32_t x, uint32_t o, MARK turn): board{x, o}, turn(turn) {}
+Board::Board(const uint64_t x, const uint64_t o, const MARK turn): board{x, o}, turn(turn) {}
 
 Board::~Board() = default;
 
-uint32_t Board::getXBoard() const { return board[X]; }
-uint32_t Board::getOBoard() const { return board[O]; }
+uint64_t Board::getXBoard() const { return board[X]; }
+uint64_t Board::getOBoard() const { return board[O]; }
 MARK Board::getActiveTurn() const { return turn; }
 
-int Board::evaluate(int depth)
+int Board::evaluate(const int depth)
 {
     /* Si ha ganado, devolvemos un puntaje positivo
      * Se resta la profundidad para penalizar las victorias que ocurren en niveles más profundos.
@@ -33,24 +33,25 @@ int Board::evaluate(int depth)
         return 0;  // Empate
 }
 
-std::vector<int> Board::generateAllLegalMoves() {
+std::vector<int> Board::generateAllLegalMoves() const
+{
     std::vector<int> legalMoves;
-    for (int i = 0; i < 16; i++)  // Cambiado de 9 a 16
+    for (int i = 0; i < 64; i++)
         if (isLegalMove(i))
             legalMoves.push_back(i);
     return legalMoves;
 }
 
-bool Board::isLegalMove(int position)
+bool Board::isLegalMove(const int position) const
 {
-    if (position < 0 || position > 15)  // posicion dentro del rango?
+    if (position < 0 || position >= 64)  // posicion dentro del rango?
         return false;
     if ((board[X] | board[O]) & (oneMask << position))  // posicion es vacia?
         return false;
     return true;
 }
 
-bool Board::makeMove(int position)
+bool Board::makeMove(const int position)
 {
     if (isLegalMove(position)) {
         board[turn] |= (oneMask << position);
@@ -60,51 +61,87 @@ bool Board::makeMove(int position)
     return false;
 }
 
-void Board::undoMove(int position)
+bool Board::checkWin(uint64_t board)
 {
-    board[turn] ^= (oneMask << position);
-}
+    uint64_t winningBoards[76] = {
+        //Filas por nivel
+        0b0000000000000000000000000000000000000000000000000000000000001111ULL,  // Fila 1, Nivel 0 (posiciones 0, 1, 2, 3)
+        0b0000000000000000000000000000000000000000000000000000000011110000ULL,  // Fila 2, Nivel 0 (posiciones 4, 5, 6, 7)
+        0b0000000000000000000000000000000000000000000000000000111100000000ULL,  // Fila 3, Nivel 0 (posiciones 8, 9, 10, 11)
+        0b0000000000000000000000000000000000000000000000001111000000000000ULL,  // Fila 4, Nivel 0 (posiciones 12, 13, 14, 15)
+        0b0000000000000000000000000000000000000000000001111000000000000000ULL,  // Fila 1, Nivel 1 (posiciones 16, 17, 18, 19)
+        0b0000000000000000000000000000000000000000011110000000000000000000ULL,  // Fila 2, Nivel 1 (posiciones 20, 21, 22, 23)
+        0b0000000000000000000000000000000000001111000000000000000000000000ULL,  // Fila 3, Nivel 1 (posiciones 24, 25, 26, 27)
+        0b0000000000000000000000000000001111000000000000000000000000000000ULL,  // Fila 4, Nivel 1 (posiciones 28, 29, 30, 31)
+        0b0000000000000000000000000001111000000000000000000000000000000000ULL,  // Fila 1, Nivel 2 (posiciones 32, 33, 34, 35)
+        0b0000000000000000000000001111000000000000000000000000000000000000ULL,  // Fila 2, Nivel 2 (posiciones 36, 37, 38, 39)
+        0b0000000000000000000011110000000000000000000000000000000000000000ULL,  // Fila 3, Nivel 2 (posiciones 40, 41, 42, 43)
+        0b0000000000000000111100000000000000000000000000000000000000000000ULL,  // Fila 4, Nivel 2 (posiciones 44, 45, 46, 47)
+        0b0000000000001111000000000000000000000000000000000000000000000000ULL,  // Fila 1, Nivel 3 (posiciones 48, 49, 50, 51)
+        0b0000000000111100000000000000000000000000000000000000000000000000ULL,  // Fila 2, Nivel 3 (posiciones 52, 53, 54, 55)
+        0b0000000011110000000000000000000000000000000000000000000000000000ULL,  // Fila 3, Nivel 3 (posiciones 56, 57, 58, 59)
+        0b0000111100000000000000000000000000000000000000000000000000000000ULL,  // Fila 4, Nivel 3 (posiciones 60, 61, 62, 63)
+        //Columnas por nivel
+        0b0000000000000000000000000000000000000000000000000000000000010001ULL,  // Columna 1, Nivel 0 (posiciones 0, 4, 8, 12)
+        0b0000000000000000000000000000000000000000000000000000000000100010ULL,  // Columna 2, Nivel 0 (posiciones 1, 5, 9, 13)
+        0b0000000000000000000000000000000000000000000000000000000001000100ULL,  // Columna 3, Nivel 0 (posiciones 2, 6, 10, 14)
+        0b0000000000000000000000000000000000000000000000000000000010001000ULL,  // Columna 4, Nivel 0 (posiciones 3, 7, 11, 15)
+        0b0000000000000000000000000000000000000000000000000000010001000000ULL,  // Columna 1, Nivel 1 (posiciones 16, 20, 24, 28)
+        0b0000000000000000000000000000000000000000000000000000100010000000ULL,  // Columna 2, Nivel 1 (posiciones 17, 21, 25, 29)
+        0b0000000000000000000000000000000000000000000000000001000100000000ULL,  // Columna 3, Nivel 1 (posiciones 18, 22, 26, 30)
+        0b0000000000000000000000000000000000000000000000000010001000000000ULL,  // Columna 4, Nivel 1 (posiciones 19, 23, 27, 31)
+        0b0000000000000000000000000000000000000000000000000100010000000000ULL,  // Columna 1, Nivel 2 (posiciones 32, 36, 40, 44)
+        0b0000000000000000000000000000000000000000000000001000100000000000ULL,  // Columna 2, Nivel 2 (posiciones 33, 37, 41, 45)
+        0b0000000000000000000000000000000000000000000000010001000000000000ULL,  // Columna 3, Nivel 2 (posiciones 34, 38, 42, 46)
+        0b0000000000000000000000000000000000000000000000100010000000000000ULL,  // Columna 4, Nivel 2 (posiciones 35, 39, 43, 47)
+        0b0000000000000000000000000000000000000000000100010000000000000000ULL,  // Columna 1, Nivel 3 (posiciones 48, 52, 56, 60)
+        0b0000000000000000000000000000000000000000001000100000000000000000ULL,  // Columna 2, Nivel 3 (posiciones 49, 53, 57, 61)
+        0b0000000000000000000000000000000000000000010001000000000000000000ULL,  // Columna 3, Nivel 3 (posiciones 50, 54, 58, 62)
+        0b0000000000000000000000000000000000000000100010000000000000000000ULL,  // Columna 4, Nivel 3 (posiciones 51, 55, 59, 63)
+        /*0b0000000000000000000000000000000000000000000000000001000100010001ULL,  // Columna 1, Nivel 0 (posiciones 0, 4, 8, 12)
+        0b0000000000000000000000000000000000000000000000000010001000100010ULL,  // Columna 2, Nivel 0 (posiciones 1, 5, 9, 13)
+        0b0000000000000000000000000000000000000000000000000100010001000100ULL,  // Columna 3, Nivel 0 (posiciones 2, 6, 10, 14)
+        0b0000000000000000000000000000000000000000000000001000100010001000ULL,  // Columna 4, Nivel 0 (posiciones 3, 7, 11, 15)
+        0b0000000000000000000000000000000000010001000100010000000000000000ULL,  // Columna 1, Nivel 1 (posiciones 16, 20, 24, 28)
+        0b0000000000000000000000000000000000100010001000100000000000000000ULL,  // Columna 2, Nivel 1 (posiciones 17, 21, 25, 29)
+        0b0000000000000000000000000000000001000100010001000000000000000000ULL,  // Columna 3, Nivel 1 (posiciones 18, 22, 26, 30)
+        0b0000000000000000000000000000000010001000100010000000000000000000ULL,  // Columna 4, Nivel 1 (posiciones 19, 23, 27, 31)
+        0b0000000000000000000100010001000100000000000000000000000000000000ULL,  // Columna 1, Nivel 2 (posiciones 32, 36, 40, 44)
+        0b0000000000000000001000100010001000000000000000000000000000000000ULL,  // Columna 2, Nivel 2 (posiciones 33, 37, 41, 45)
+        0b0000000000000000010001000100010000000000000000000000000000000000ULL,  // Columna 3, Nivel 2 (posiciones 34, 38, 42, 46)
+        0b0000000000000000100010001000100000000000000000000000000000000000ULL,  // Columna 4, Nivel 2 (posiciones 35, 39, 43, 47)
+        0b0001000100010001000000000000000000000000000000000000000000000000ULL,  // Columna 1, Nivel 3 (posiciones 48, 52, 56, 60)
+        0b0010001000100010000000000000000000000000000000000000000000000000ULL,  // Columna 2, Nivel 3 (posiciones 49, 53, 57, 61)
+        0b0100010001000100000000000000000000000000000000000000000000000000ULL,  // Columna 3, Nivel 3 (posiciones 50, 54, 58, 62)
+        0b1000100010001000000000000000000000000000000000000000000000000000ULL,  // Columna 4, Nivel 3 (posiciones 51, 55, 59, 63)*/
 
-bool Board::checkWin(uint32_t board) {
-    uint32_t winningBoards[10] = {
-        0b1111000000000000,  // fila superior
-        0b0000111100000000,  // fila segunda
-        0b0000000011110000,  // fila tercera
-        0b0000000000001111,  // fila inferior
-        0b1000100010001000,  // columna izquierda
-        0b0100010001000100,  // columna segunda
-        0b0010001000100010,  // columna tercera
-        0b0001000100010001,  // columna derecha
-        0b1000010000100001,  // diagonal principal
-        0b0001001001001000   // diagonal secundaria
     };
-    for (uint32_t wp : winningBoards)
+    for (uint64_t wp : winningBoards)
         if ((board & wp) == wp) return true;
     return false;
 }
 
-bool Board::hasXWon() { return checkWin(board[X]); }
-bool Board::hasOWon() { return checkWin(board[O]); }
+bool Board::hasXWon() const { return checkWin(board[X]); }
+bool Board::hasOWon() const { return checkWin(board[O]); }
+bool Board::isFull() const { return (board[X] | board[O]) == fullMask; }
+bool Board::endGame() const { return hasXWon() || hasOWon() || isFull(); }
 
-bool Board::isFull()
-{
-    return (board[X] | board[O]) == fullMask;
-}
-
-bool Board::endGame()
-{
-    return hasXWon() || hasOWon() || isFull();
-}
-
-void Board::print() {
-    for (int i = 0; i < 16; i++) {  // 16 casillas ahora
-        if (board[X] & (oneMask << i))
-            std::cout << "X ";
-        else if (board[O] & (oneMask << i))
-            std::cout << "O ";
-        else
-            std::cout << "- ";
-        if (i % 4 == 3) std::cout << std::endl;  // Cambio de fila después de cada 4 posiciones
+void Board::print() const {
+    for (int level = 0; level < 4; ++level) {
+        std::cout << "Nivel " << level + 1 << ":\n";
+        for (int row = 0; row < 4; ++row) {
+            for (int col = 0; col < 4; ++col) {
+                int pos = level * 16 + row * 4 + col;
+                if (board[X] & (oneMask << pos)) {
+                    std::cout << "X ";
+                } else if (board[O] & (oneMask << pos)) {
+                    std::cout << "O ";
+                } else {
+                    std::cout << "- ";
+                }
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
 }
