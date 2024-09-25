@@ -6,9 +6,9 @@ Board::Board()
 {
     // Bitboards para cada jugador.
     // Usando valores binarios, inicialmente vacíos.
-    board[X] = 0; // Bitboard para X
-    board[O] = 0; // Bitboard para O
-    turn = X;  // Comienza jugando X
+    board[X] = 0b0; // Bitboard para X
+    board[O] = 0b0; // Bitboard para O
+    turn = O;  // Comienza jugando X
 }
 
 Board::Board(const uint64_t x, const uint64_t o, const MARK turn): board{x, o}, turn(turn) {}
@@ -63,7 +63,7 @@ bool Board::makeMove(const int position)
 
 bool Board::checkWin(uint64_t board)
 {
-    uint64_t winningBoards[76] = {
+    uint64_t winningBoards[56] = {
         //Filas por nivel
         0b0000000000000000000000000000000000000000000000000000000000001111ULL,  // Fila 1, Nivel 0 (posiciones 0, 1, 2, 3)
         0b0000000000000000000000000000000000000000000000000000000011110000ULL,  // Fila 2, Nivel 0 (posiciones 4, 5, 6, 7)
@@ -123,8 +123,7 @@ bool Board::checkWin(uint64_t board)
         0b0001000000000000000100000000000000010000000000000001000000000000ULL, // Posiciones 12, 28, 44, 60
         0b0010000000000000001000000000000000100000000000000010000000000000ULL, // Posiciones 13, 29, 45, 61
         0b0100000000000000010000000000000001000000000000000100000000000000ULL, // Posiciones 14, 30, 46, 62
-        0b1000000000000000100000000000000010000000000000001000000000000000ULL, // Posiciones 15, 31, 47, 63
-
+        0b1000000000000000100000000000000010000000000000001000000000000000ULL // Posiciones 15, 31, 47, 63
     };
     for (uint64_t wp : winningBoards)
         if ((board & wp) == wp) return true;
