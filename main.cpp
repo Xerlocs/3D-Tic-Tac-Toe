@@ -111,13 +111,6 @@ int main()
     board.print();  // Mostrar el tablero inicial
     int depth = 0, bestPosition = -1;
 
-    // Para realizar una jugada
-    // se definen los siguientes valores para cada casilla
-    // 0 | 1 | 2
-    // 3 | 4 | 5
-    // 6 | 7 | 8
-
-    // Pruebas de juego: humano vs negamax/alphabeta
     std::cout << "Que comience el juego 4x4x4!" << std::endl;
     Board newBoard;
     while (!newBoard.endGame()) {
