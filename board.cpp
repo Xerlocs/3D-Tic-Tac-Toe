@@ -8,10 +8,10 @@ Board::Board()
     // Usando valores binarios, inicialmente vacíos.
     board[X] = 0; // Bitboard para X
     board[O] = 0; // Bitboard para O
-    turn = O;  // Comienza jugando X
+    turn = X;  // Comienza jugando X
 }
 
-Board::Board(const uint64_t x, const uint64_t o, const MARK turn): board{x, o}, turn(turn) {}
+Board::Board(const uint64_t x, const uint64_t o, const MARK turn) : board{x, o}, turn(turn) {}
 
 Board::~Board() = default;
 
@@ -26,10 +26,13 @@ int Board::evaluate(const int depth)
      * Esto hace que el algoritmo prefiera ganar más rápidamente si es posible.
      */
     if (hasXWon())
+     std::cout << "X won, evaluation at depth " << depth << std::endl;
         return (turn == X) ? (10 - depth) : (depth - 10);  // Si 'X' ha ganado, es bueno para el maximizador (X)
     if (hasOWon())
+     std::cout << "O won, evaluation at depth " << depth << std::endl;
         return (turn == O) ? (10 - depth) : (depth - 10); // Si 'O' ha ganado, es bueno para el minimizador (O)
     if (isFull())
+     std::cout << "Board is full, evaluation: 0 " << std::endl;
         return 0;  // Empate
 }
 
@@ -37,8 +40,16 @@ std::vector<int> Board::generateAllLegalMoves() const
 {
     std::vector<int> legalMoves;
     for (int i = 0; i < 64; i++)
+    {
         if (isLegalMove(i))
+        {
             legalMoves.push_back(i);
+            std::cout << "Legal move found at position " << i << std::endl;
+        }
+    }
+    if (legalMoves.empty()) {
+    std::cout << "No legal moves found!" << std::endl;
+    }
     return legalMoves;
 }
 
@@ -54,10 +65,12 @@ bool Board::isLegalMove(const int position) const
 bool Board::makeMove(const int position)
 {
     if (isLegalMove(position)) {
+        std::cout << "Player " << (turn == X ? "X" : "O") << " makes move at position " << position << std::endl;
         board[turn] |= (oneMask << position);
         turn = 1-turn == 0 ? X : O;  // cambio de turno
         return true;
     }
+     std::cout << "Illegal move attempted at position " << position << std::endl;
     return false;
 }
 
@@ -133,7 +146,12 @@ bool Board::checkWin(uint64_t board)
 bool Board::hasXWon() const { return checkWin(board[X]); }
 bool Board::hasOWon() const { return checkWin(board[O]); }
 bool Board::isFull() const { return (board[X] | board[O]) == fullMask; }
-bool Board::endGame() const { return hasXWon() || hasOWon() || isFull(); }
+bool Board::endGame() const { 
+    std::cout << "Checking endGame: hasXWon() = " << hasXWon() 
+              << ", hasOWon() = " << hasOWon() 
+              << ", isFull() = " << isFull() << std::endl;
+    return hasXWon() || hasOWon() || isFull(); 
+    }
 
 void Board::print() const {
     for (int level = 0; level < 4; ++level) {
