@@ -35,7 +35,7 @@ int alphabeta(Board node, int maxDepth, int depth, int alpha, int beta, int &bes
 
     int bestValue = -10000, dummy;  
     for (int position : node.generateAllLegalMoves()) {
-        std::cout << "z";
+        //std::cout << "z";
         Board child(node.getXBoard(), node.getOBoard(), node.getActiveTurn());
         child.makeMove(position);
 
@@ -181,9 +181,9 @@ int main() {
             int maxDepth = 9;  // Ajustar según el rendimiento
             // Descomentar la función que deseas medir
             //negamax(newBoard, depth, bestPosition);
-            //alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
+            alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             //iterativeDeepening(newBoard, maxDepth, bestPosition);
-            alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
+            //alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             position = bestPosition;
         } else {
             std::cout << "Ingresa una posición: ";

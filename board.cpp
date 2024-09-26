@@ -27,10 +27,10 @@ int Board::evaluate(const int depth)
      */
     if (hasXWon())
      std::cout << "X won, evaluation at depth " << depth << std::endl;
-        return (turn == X) ? (10 - depth) : (depth - 10);  // Si 'X' ha ganado, es bueno para el maximizador (X)
+        return (turn == X) ? (65 - depth) : (depth - 65);  // Si 'X' ha ganado, es bueno para el maximizador (X)
     if (hasOWon())
      std::cout << "O won, evaluation at depth " << depth << std::endl;
-        return (turn == O) ? (10 - depth) : (depth - 10); // Si 'O' ha ganado, es bueno para el minimizador (O)
+        return (turn == O) ? (65 - depth) : (depth - 65); // Si 'O' ha ganado, es bueno para el minimizador (O)
     if (isFull())
      std::cout << "Board is full, evaluation: 0 " << std::endl;
         return 0;  // Empate
