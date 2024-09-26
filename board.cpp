@@ -26,9 +26,9 @@ int Board::evaluate(const int depth)
      * Esto hace que el algoritmo prefiera ganar más rápidamente si es posible.
      */
     if (hasXWon())
-        return (turn == X) ? (10 - depth) : (depth - 10);  // Si 'X' ha ganado, es bueno para el maximizador (X)
+        return (turn == X) ? (65 - depth) : (depth - 65);  // Si 'X' ha ganado, es bueno para el maximizador (X)//modificar el 10, ya que estas son las posibles jugadas
     if (hasOWon())
-        return (turn == O) ? (10 - depth) : (depth - 10); // Si 'O' ha ganado, es bueno para el minimizador (O)
+        return (turn == O) ? (65 - depth) : (depth - 65); // Si 'O' ha ganado, es bueno para el minimizador (O)
     if (isFull())
         return 0;  // Empate
 }

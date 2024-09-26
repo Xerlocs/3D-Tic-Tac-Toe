@@ -117,7 +117,8 @@ int main()
         int position;
         if (newBoard.getActiveTurn() == X) {
             int maxDepth = 9;  // Ajustar según el rendimiento
-            alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
+            alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
+            //alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             position = bestPosition;
         } else {
             std::cout << "Ingresa una posición: ";
