@@ -31,11 +31,40 @@ int Board::evaluate(const int depth)
      //std::cout << "Board is full, evaluation: 0 " << std::endl;
         return 0;  // Empate
     
-    int xScore = countAlmostWinningLines(board[X]);
+    //int xScore = countAlmostWinningLines(board[X]);
+    int xScore = countAlmostWinningLines(board[X]) * 2;
     int oScore = countAlmostWinningLines(board[O]);
 
     return (xScore - oScore) * (65 - depth);
 }
+
+/*// Tabla hash para almacenar evaluaciones de tableros
+std::unordered_map<uint64_t, int> evalCache;
+
+int Board::evaluate(const int depth) {
+    uint64_t boardHash = (board[X] << 32) | board[O];
+    if (evalCache.find(boardHash) != evalCache.end()) {
+        return evalCache[boardHash];
+    }
+
+    int score = 0;
+
+    // Evaluar si hay un ganador
+    if (hasXWon()) {
+        score = (65 - depth);
+    } else if (hasOWon()) {
+        score = (depth - 65);
+    } else if (isFull()) {
+        score = 0;
+    } else {
+        // Otras heurísticas aquí (casi ganadoras, líneas favorables, etc.)
+        score = countAlmostWinningLines(board[X]) - countAlmostWinningLines(board[O]);
+    }
+
+    // Almacenar la evaluación en la tabla hash
+    evalCache[boardHash] = score;
+    return score;
+}*/
 
 int Board::countAlmostWinningLines(uint64_t playerBoard){
     int score = 0;

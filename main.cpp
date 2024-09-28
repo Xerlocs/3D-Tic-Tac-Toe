@@ -176,7 +176,7 @@ int main() {
     while (!newBoard.endGame()) {
         int position;
         if (newBoard.getActiveTurn() == X) {
-            int maxDepth = 6;  // Ajustar según el rendimiento
+            int maxDepth = 9;  // Ajustar según el rendimiento
             // Descomentar la función que deseas medir
             //negamax(newBoard, depth, bestPosition);
             //alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
