@@ -51,10 +51,8 @@ int alphabeta(Board node, int maxDepth, int depth, int alpha, int beta, int &bes
 }
 
 int iterativeDeepening(Board node, int maxDepth, int &bestPosition) {
-    std::cout << "x";
     int value;
     for(int depth = 0; depth < maxDepth; depth++) {
-        std::cout << "\n" << depth;
         nodesEvaluated = 0;  // Resetear contador de nodos por cada profundidad
         auto start = std::chrono::high_resolution_clock::now(); // Comenzar tiempo
 
@@ -64,10 +62,10 @@ int iterativeDeepening(Board node, int maxDepth, int &bestPosition) {
         std::chrono::duration<double> elapsed = end - start; // Calcular tiempo transcurrido
         
         // Imprimir estadísticas
-        //std::cout << "Iteración a profundidad " << depth << ":\n";
-        //std::cout << "Tiempo de ejecución: " << elapsed.count() << " segundos\n";
-        //std::cout << "Nodos revisados: " << nodesEvaluated << "\n";
-        //std::cout << "Nodos por segundo: " << (nodesEvaluated / elapsed.count()) << "\n\n";
+        std::cout << "Iteración a profundidad " << depth << ":\n";
+        std::cout << "Tiempo de ejecución: " << elapsed.count() << " segundos\n";
+        std::cout << "Nodos revisados: " << nodesEvaluated << "\n";
+        std::cout << "Nodos por segundo: " << (nodesEvaluated / elapsed.count()) << "\n\n";
     }
     return value;
 }
@@ -178,11 +176,11 @@ int main() {
     while (!newBoard.endGame()) {
         int position;
         if (newBoard.getActiveTurn() == X) {
-            int maxDepth = 9;  // Ajustar según el rendimiento
+            int maxDepth = 6;  // Ajustar según el rendimiento
             // Descomentar la función que deseas medir
             //negamax(newBoard, depth, bestPosition);
-            alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
-            //iterativeDeepening(newBoard, maxDepth, bestPosition);
+            //alphabeta(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
+            iterativeDeepening(newBoard, maxDepth, bestPosition);
             //alphabetaTT(newBoard, maxDepth, depth, -10000000, 10000000, bestPosition);
             position = bestPosition;
         } else {
