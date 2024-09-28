@@ -23,6 +23,7 @@ class Board
         ~Board();  // Destructor prototype
 
         int evaluate(int depth);  // Función de evaluación
+        int countAlmostWinningLines(uint64_t playerBoard);
         std::vector<int> generateAllLegalMoves() const;
 
         uint64_t getXBoard() const;
